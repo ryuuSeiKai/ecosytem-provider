@@ -190,10 +190,11 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
         this.emit("accountsChanged");
     };
 
-    CustomProvider.prototype.setNetwork = function (rpc, emit) {
+    CustomProvider.prototype.setNetwork = function (rpc, chainId ,emit = false) {
       var that = this;
       that = new CustomHttpProvider(this.rpc);
       this.host = rpc;
+      this.chainId = chainId;
       this.setAccount(this._privateKey);
       if (emit) 
         this.emit("chainChanged");
