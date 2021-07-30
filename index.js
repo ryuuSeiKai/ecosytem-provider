@@ -167,6 +167,26 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
         this.wrapResults = new Map();
         this.setAccount(privateKey);
     };
+
+    CustomProvider.prototype.setAddress = function(address) {
+      const lowerAddress = (address || "");
+      this.address = lowerAddress;
+      this.ready = !!address;
+      for (var i = 0; i < window.frames.length; i++) {
+        const frame = window.frames[i];
+        if (frame.ethereum && frame.ethereum.isTrust) {
+          frame.ethereum.address = lowerAddress;
+          frame.ethereum.ready = !!address;
+        }
+      }
+    }
+    // CustomProvider.prototype.disconnect = function() {
+
+    // }
+
+    CustomProvider.prototype.isConnected = function() {
+      return true;
+    }
     
     CustomProvider.prototype = new CustomHttpProvider(this.host);
 
@@ -192,8 +212,9 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
     CustomProvider.prototype.setAccount = function (privateKey, emit = false) {
       this._signer = new ethers.Wallet(privateKey, this);
       this._privateKey = privateKey;
+      // this.setAddress(this._signer.);
       if (emit)
-        this.emit("accountsChanged");
+        this.emit("accountsChanged", this.eth_accounts());
     };
 
     CustomProvider.prototype.setNetwork = function (rpc, chainId ,emit = false) {
@@ -203,7 +224,7 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
       this.chainId = chainId;
       this.setAccount(this._privateKey);
       if (emit) 
-        this.emit("chainChanged");
+        this.emit("chainChanged", this.eth_chainId());
     };
     
     CustomProvider.prototype.request = function(payload) {
@@ -347,7 +368,7 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
     };
     
     CustomProvider.prototype.eth_coinbase = function() {
-      return 'BNB';
+      return this._signer.signingKey.address;
     };
     
     CustomProvider.prototype.net_version = function() {
@@ -422,7 +443,6 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
      * @private Internal js -> native message handler
      */
     CustomProvider.prototype.postMessage = function(handler, id, data) {
-         this.ready = true;
       if (this.ready || handler === "requestAccounts") {
         let object = {
           id: id,
