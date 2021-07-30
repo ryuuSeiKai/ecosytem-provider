@@ -214,6 +214,57 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
       }
       return this._request(payload, false);
     };
+
+    /**
+     * @deprecated Use request() method instead.
+     */
+    CustomProvider.prototype.send = function(payload) {
+      let response = { jsonrpc: "2.0", id: payload.id };
+      switch (payload.method) {
+        case "eth_accounts":
+          response.result = this.eth_accounts();
+          break;
+        case "eth_coinbase":
+          response.result = this.eth_coinbase();
+          break;
+        case "net_version":
+          response.result = this.net_version();
+          break;
+        case "eth_chainId":
+          response.result = this.eth_chainId();
+          break;
+        default:
+          throw new ProviderRpcError(
+            4200,
+            `CustomProvider does not support calling ${payload.method} synchronously without a callback. Please provide a callback parameter to call ${payload.method} asynchronously.`
+          );
+      }
+      return response;
+    }
+
+    /**
+     * @deprecated Use request() method instead.
+     */
+     CustomProvider.prototype.sendAsync = function(payload, callback) {
+      console.log(
+        "sendAsync(data, callback) is deprecated, please use window.ethereum.request(data) instead."
+      );
+      // this points to window in methods like web3.eth.getAccounts()
+      var that = this;
+      if (!(this instanceof CustomProvider)) {
+        that = window.ethereum;
+      }
+      if (Array.isArray(payload)) {
+        Promise.all(payload.map(that._request.bind(that)))
+          .then((data) => callback(null, data))
+          .catch((error) => callback(error, null));
+      } else {
+        that
+          ._request(payload)
+          .then((data) => callback(null, data))
+          .catch((error) => callback(error, null));
+      }
+    }
     
     CustomProvider.prototype._request = function(payload, wrapResult = true) {
       this.idMapping.tryIntifyId(payload);
