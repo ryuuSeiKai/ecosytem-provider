@@ -158,7 +158,6 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
     // emit event : connect, disconnect, chainChanged, accountsChanged, message
 
     var CustomProvider = function(host, privateKey = null, config = {}) {
-
         // set config
         this.chainId = config.chainId || '';
 
@@ -170,6 +169,13 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
     };
     
     CustomProvider.prototype = new CustomHttpProvider(this.host);
+
+    CustomProvider.prototype.enable = function() {
+      console.log(
+        'enable() is deprecated, please use window.ethereum.request({method: "eth_requestAccounts"}) instead.'
+      );
+      return this.request({ method: "eth_requestAccounts", params: [] });
+    }
 
     CustomProvider.prototype.emitConnect = function(chainId) {
       this.emit("connect", { chainId: chainId });
