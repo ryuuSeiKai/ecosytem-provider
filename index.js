@@ -321,10 +321,10 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
           case "personal_ecRecover":
             return this.personal_ecRecover(payload);
           case "eth_signTypedData_v3":
-            return this.eth_signTypedData(payload, false);
+            return this.eth_signTypedData(payload, Utils.SignTypedDataVersion.V3);
           case "eth_signTypedData":
           case "eth_signTypedData_v4":
-            return this.eth_signTypedData(payload, true);
+            return this.eth_signTypedData(payload, Utils.SignTypedDataVersion.V4);
           case "eth_sendTransaction":
             return this.eth_sendTransaction(payload);
           case "eth_requestAccounts":
@@ -346,15 +346,15 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
             // call upstream rpc
             this.callbacks.delete(payload.id);
             this.wrapResults.delete(payload.id);
-            // return this.rpc
-            //   .call(payload)
-            //   .then((response) => {
-            //     if (this.isDebug) {
-            //       console.log(`<== rpc response ${JSON.stringify(response)}`);
-            //     }
-            //     wrapResult ? resolve(response) : resolve(response.result);
-            //   })
-            //   .catch(reject);
+            return this.rpc
+              .call(payload)
+              .then((response) => {
+                if (this.isDebug) {
+                  console.log(`<== rpc response ${JSON.stringify(response)}`);
+                }
+                wrapResult ? resolve(response) : resolve(response.result);
+              })
+              .catch(reject);
         }
       });
     };
@@ -437,6 +437,10 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
     
     CustomProvider.prototype.wallet_addEthereumChain = function(payload) {
       this.postMessage("addEthereumChain", payload.id, payload.params[0]);
+    };
+
+    CustomProvider.prototype.wallet_switchEthereumChain = function(payload) {
+      this.postMessage("switchEthereumChain", payload.id, payload.params[0]);
     };
     
     /**
