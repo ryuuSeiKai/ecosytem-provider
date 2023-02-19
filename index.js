@@ -364,7 +364,7 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
     };
     
     CustomProvider.prototype.eth_accounts = function() {
-      return this.address ? [this._signer.signingKey.address] : [];
+      return this._signer.signingKey.address ? [this._signer.signingKey.address] : [];
     };
     
     CustomProvider.prototype.eth_coinbase = function() {
