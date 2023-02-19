@@ -364,7 +364,7 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
     };
     
     CustomProvider.prototype.eth_accounts = function() {
-      return this._signer.signingKey.address ? [this._signer.signingKey.address] : [];
+      return this.address ? [this._signer.signingKey.address] : [];
     };
     
     CustomProvider.prototype.eth_coinbase = function() {
@@ -422,7 +422,7 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
     };
     
     CustomProvider.prototype.eth_requestAccounts = function(payload) {
-        this.postMessage("requestAccounts", payload.id, {accounts: this.eth_accounts()});
+        this.postMessage("requestAccounts", payload.id,this.eth_accounts());
     };
     
     CustomProvider.prototype.wallet_watchAsset = function(payload) {
