@@ -157,6 +157,7 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
     // EIP1139 
     // emit event : connect, disconnect, chainChanged, accountsChanged, message
 
+
     var CustomProvider = function(host, privateKey = null, config = {}) {
         // set config
         this.chainId = config.chainId || '';
@@ -184,8 +185,10 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
 
     // }
 
+    CustomProvider.prototype.connected = false;
+
     CustomProvider.prototype.isConnected = function() {
-      return true;
+      return this.connected;
     }
     
     CustomProvider.prototype = new CustomHttpProvider(this.host);
@@ -198,7 +201,10 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
     }
 
     CustomProvider.prototype.emitConnect = function(chainId) {
+     if (!this.connected) {
+      this.connected = true;
       this.emit("connect", { chainId: chainId });
+     }
     }
 
     CustomProvider.prototype.getSigner = function() {
@@ -214,6 +220,7 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
       this._privateKey = privateKey;
       // this.setAddress(this._signer.);
       if (emit)
+        this.emitConnect();
         this.emit("accountsChanged", this.eth_accounts());
     };
 
@@ -224,6 +231,7 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
       this.chainId = chainId;
       this.setAccount(this._privateKey);
       if (emit) 
+        this.emitConnect();
         this.emit("chainChanged", this.eth_chainId());
     };
     
@@ -306,6 +314,7 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
         this.wrapResults.set(payload.id, wrapResult);
     
         switch (payload.method) {
+          case "eth_requestAccounts":
           case "eth_accounts":
             return this.sendResponse(payload.id, this.eth_accounts());
           case "eth_coinbase":
@@ -327,8 +336,7 @@ require(["https://cdn.ethers.io/scripts/ethers-v4.min.js",
             return this.eth_signTypedData(payload, Utils.SignTypedDataVersion.V4);
           case "eth_sendTransaction":
             return this.eth_sendTransaction(payload);
-          case "eth_requestAccounts":
-            return this.eth_requestAccounts(payload);
+            // return this.eth_requestAccounts(payload);
           case "wallet_watchAsset":
             return this.wallet_watchAsset(payload);
           case "wallet_addEthereumChain":
